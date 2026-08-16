@@ -1,0 +1,20 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+
+ColumnLimit: 100
+IndentWidth: 4
+AccessModifierOffset: -4
+
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+# Заголовки подсистем отделены от стандартной библиотеки и сторонних.
+IncludeBlocks: Preserve
+SortIncludes: CaseSensitive
+
+SeparateDefinitionBlocks: Always

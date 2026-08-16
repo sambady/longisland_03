@@ -4,13 +4,14 @@
 .vscode/
 
 # Build
-build/
-out/
-cmake-build-*/
+/build/
+/out/
+/cmake-build-*/
 CMakeUserPresets.json
+compile_commands.json
 
 # Assets
-assets/cooked/
+/assets/cooked/
 
 # OS
 .DS_Store

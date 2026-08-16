@@ -1,0 +1,39 @@
+---
+# Набор проверок отражает правила из .claude/CLAUDE.md: явное владение,
+# отсутствие глобального изменяемого состояния, данные вместо иерархий.
+#
+# portability-avoid-pragma-once отключён: #pragma once поддерживают все целевые
+# компиляторы, а include guards многословнее и допускают конфликт имён.
+Checks: >
+  bugprone-*,
+  cppcoreguidelines-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -bugprone-easily-swappable-parameters,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -misc-non-private-member-variables-in-classes,
+  -modernize-use-trailing-return-type,
+  -portability-avoid-pragma-once,
+  -readability-identifier-length,
+  -readability-magic-numbers
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '(engine|runtime|game|client)/.*'
+FormatStyle: file
+
+CheckOptions:
+  readability-identifier-naming.NamespaceCase: lower_case
+  readability-identifier-naming.ClassCase: CamelCase
+  readability-identifier-naming.StructCase: CamelCase
+  readability-identifier-naming.EnumCase: CamelCase
+  readability-identifier-naming.FunctionCase: lower_case
+  readability-identifier-naming.VariableCase: lower_case
+  readability-identifier-naming.ParameterCase: lower_case
+  readability-identifier-naming.PrivateMemberSuffix: _
+  readability-identifier-naming.ConstantCase: lower_case
+  # Сокращений избегаем — CLAUDE.md, раздел 9.
+  readability-identifier-naming.AggressiveDependentMemberLookup: true

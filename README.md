@@ -28,7 +28,10 @@ Avoid adding systems just because a traditional engine normally has them. Every 
 |---|---|
 | Language | C++20 initially |
 | Build | CMake + Ninja |
-| Compiler | Clang / MSVC |
+| Compiler | clang-cl / MSVC |
+| Linker | lld-link |
+| Compile cache | sccache |
+| Dependencies | FetchContent |
 | Rendering | bgfx |
 | Window / input | SDL3 |
 | Math | glm |
@@ -61,7 +64,7 @@ Dependencies should be kept minimal. Prefer small libraries over large framework
                          |
                 +--------+--------+
                 |   Game Runtime  |
-                |                 |
+                |    runtime/     |
                 | World           |
                 | ECS             |
                 | Networking      |
@@ -71,9 +74,10 @@ Dependencies should be kept minimal. Prefer small libraries over large framework
                          |
                 +--------+--------+
                 |  Engine Layer   |
-                |                 |
-                | Renderer        |
+                |    engine/      |
+                | Core            |
                 | Platform        |
+                | Renderer        |
                 | Audio           |
                 | Physics         |
                 | Animation       |
@@ -114,46 +118,23 @@ Game systems should not directly depend on bgfx.
 ├── cmake/
 │   └── ...
 │
-├── engine/
+├── engine/                  устройства и ресурсы
 │   ├── core/
 │   │   ├── include/
 │   │   └── src/
 │   │
-│   ├── ecs/
-│   │   ├── include/
-│   │   └── src/
-│   │
+│   ├── platform/
 │   ├── renderer/
-│   │   ├── include/
-│   │   └── src/
-│   │
-│   ├── assets/
-│   │   ├── include/
-│   │   └── src/
-│   │
-│   ├── world/
-│   │   ├── include/
-│   │   └── src/
-│   │
 │   ├── animation/
-│   │   ├── include/
-│   │   └── src/
-│   │
 │   ├── physics/
-│   │   ├── include/
-│   │   └── src/
-│   │
-│   ├── audio/
-│   │   ├── include/
-│   │   └── src/
-│   │
-│   ├── networking/
-│   │   ├── include/
-│   │   └── src/
-│   │
-│   └── platform/
-│       ├── include/
-│       └── src/
+│   └── audio/
+│
+├── runtime/                 мир и правила его существования
+│   ├── ecs/
+│   ├── world/
+│   ├── assets/
+│   ├── streaming/
+│   └── networking/
 │
 ├── game/
 │   ├── components/
@@ -659,11 +640,13 @@ The custom runtime should remain small enough that the entire architecture can b
 
 ## Current Status
 
-This repository is in the **initial architecture phase**.
+The build skeleton is in place: toolchain, CMake project, layer boundaries enforced at configure time, and a client executable that builds under both clang-cl and MSVC. No dependencies are wired in yet.
+
+See `docs/build/toolchain.md` for the toolchain and `docs/code_map.md` for the subsystem map.
 
 The next implementation task should be:
 
-> Create the minimal CMake project, integrate SDL3 and bgfx, open a window, initialize bgfx, render a clear frame, and shut down cleanly on the target desktop platforms.
+> Integrate SDL3 and bgfx, open a window, initialize bgfx, render a clear frame, and shut down cleanly on the target desktop platforms.
 
 Do not implement ECS, networking, asset streaming, gameplay, or a custom editor yet.
 
