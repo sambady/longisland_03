@@ -1,0 +1,18 @@
+# IDE
+.idea/
+.vs/
+.vscode/
+
+# Build
+build/
+out/
+cmake-build-*/
+CMakeUserPresets.json
+
+# Assets
+assets/cooked/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
