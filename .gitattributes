@@ -1,0 +1,31 @@
+# В репозитории переносы строк LF. В рабочем каталоге Windows их получает
+# тоже LF: инструменты сборки и компиляторы работают с LF на всех платформах,
+# а смешивание стилей в одном файле создаёт ложные различия в diff.
+* text=auto eol=lf
+
+# Скрипты, требующие родных переносов строк платформы.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.sh  text eol=lf
+
+# Бинарные файлы: git не трогает содержимое и не показывает построчный diff.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.ktx2   binary
+*.basis  binary
+*.dds    binary
+*.ttf    binary
+*.otf    binary
+*.wav    binary
+*.ogg    binary
+*.mp3    binary
+*.bin    binary
+*.zst    binary
+*.lib    binary
+*.dll    binary
+*.exe    binary
+*.pdb    binary

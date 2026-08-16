@@ -25,6 +25,8 @@ include(CompilerWarnings)
 include(Sanitizers)
 include(Subsystem)
 
-add_subdirectory(engine)
-add_subdirectory(runtime)
-add_subdirectory(client)
+# Корень исходников. Он же — корень include-путей: заголовок подсистемы
+# подключается с префиксом слоя, #include <engine/core/version.h>.
+set(LONGISLAND_SOURCE_ROOT "${PROJECT_SOURCE_DIR}/src")
+
+add_subdirectory(src)

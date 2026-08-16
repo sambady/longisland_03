@@ -1,12 +1,12 @@
 # Объявление подсистемы.
 #
-# Подсистема — статическая библиотека с публичным API в include/ и реализацией в src/.
-# Потребитель видит только include/, поэтому #include <engine/renderer/renderer.h>
-# работает, а #include "../src/internal.h" — нет.
+# Подсистема — статическая библиотека. Заголовки и реализация лежат рядом,
+# в src/<layer>/<subsystem>/. Публикуется корень слоя, поэтому потребитель
+# подключает заголовок как #include <engine/renderer/renderer.h>.
 #
 #   longisland_add_subsystem(renderer
 #       LAYER engine
-#       SOURCES src/renderer.cpp
+#       SOURCES renderer.cpp
 #       PUBLIC_DEPS engine::core
 #       PRIVATE_DEPS bgfx::bgfx
 #   )
@@ -46,11 +46,9 @@ function(longisland_add_subsystem name)
     add_library(${target} STATIC ${ARG_SOURCES})
     add_library(${ARG_LAYER}::${name} ALIAS ${target})
 
-    # include/ публичен, src/ доступен только реализации.
-    target_include_directories(${target}
-        PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
-        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    )
+    # Публикуется корень src/: заголовок подключается с префиксом слоя и
+    # подсистемы — #include <engine/core/version.h>.
+    target_include_directories(${target} PUBLIC "${LONGISLAND_SOURCE_ROOT}")
 
     target_link_libraries(${target}
         PUBLIC ${ARG_PUBLIC_DEPS}

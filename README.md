@@ -118,40 +118,34 @@ Game systems should not directly depend on bgfx.
 ├── cmake/
 │   └── ...
 │
-├── engine/                  устройства и ресурсы
-│   ├── core/
-│   │   ├── include/
-│   │   └── src/
+├── src/
+│   ├── engine/              устройства и ресурсы
+│   │   ├── core/
+│   │   ├── platform/
+│   │   ├── renderer/
+│   │   ├── animation/
+│   │   ├── physics/
+│   │   └── audio/
 │   │
-│   ├── platform/
-│   ├── renderer/
-│   ├── animation/
-│   ├── physics/
-│   └── audio/
-│
-├── runtime/                 мир и правила его существования
-│   ├── ecs/
-│   ├── world/
-│   ├── assets/
-│   ├── streaming/
-│   └── networking/
-│
-├── game/
-│   ├── components/
-│   ├── systems/
-│   ├── entities/
-│   ├── world/
-│   ├── combat/
-│   ├── inventory/
-│   ├── quests/
-│   ├── characters/
-│   └── npc/
-│
-├── client/
-│   └── main.cpp
-│
-├── server/
-│   └── ...
+│   ├── runtime/             мир и правила его существования
+│   │   ├── ecs/
+│   │   ├── world/
+│   │   ├── assets/
+│   │   ├── streaming/
+│   │   └── networking/
+│   │
+│   ├── game/
+│   │   ├── combat/
+│   │   ├── inventory/
+│   │   ├── quests/
+│   │   ├── characters/
+│   │   └── npc/
+│   │
+│   ├── client/
+│   │   └── main.cpp
+│   │
+│   └── server/
+│       └── ...
 │
 ├── tools/
 │   ├── asset_compiler/
