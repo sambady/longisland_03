@@ -1,14 +1,45 @@
 #include <engine/renderer/renderer.h>
 
 #include <bgfx/bgfx.h>
+
+// Варианты шейдеров, которые не компилируются:
+//
+// DXIL (s_6_0) — компилятор HLSL выдаёт предупреждение внутри собственного кода,
+//   а shaderc вызывается с --Werror. Direct3D 12 вернётся вместе с этим профилем.
+// WGSL — WebGPU в целевых платформах не значится.
+//
+// Именно макросы: их читает препроцессор bgfx/embedded_shader.h.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define BGFX_PLATFORM_SUPPORTS_DXIL 0
+#define BGFX_PLATFORM_SUPPORTS_WGSL 0
+// NOLINTEND(cppcoreguidelines-macro-usage)
+
+#include <bgfx/embedded_shader.h>
 #include <bx/math.h>
 #include <engine/renderer/camera.h>
+#include <engine/renderer/mesh.h>
+#include <engine/renderer/texture.h>
 
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <utility>
+
+#include "mesh_state.h"
+#include "texture_state.h"
+
+// Скомпилированные шейдеры: по варианту на графический API. Имена массивов
+// задаёт bgfx_compile_shaders, макрос BGFX_EMBEDDED_SHADER их и ожидает.
+#include "shaders/dxbc/fs_mesh.sc.bin.h"
+#include "shaders/dxbc/vs_mesh.sc.bin.h"
+#include "shaders/essl/fs_mesh.sc.bin.h"
+#include "shaders/essl/vs_mesh.sc.bin.h"
+#include "shaders/glsl/fs_mesh.sc.bin.h"
+#include "shaders/glsl/vs_mesh.sc.bin.h"
+#include "shaders/spirv/fs_mesh.sc.bin.h"
+#include "shaders/spirv/vs_mesh.sc.bin.h"
 
 namespace engine::renderer {
 namespace {
@@ -20,6 +51,13 @@ constexpr std::uint32_t kClearColor = 0x303030FF;
 
 /// Матрица 4×4 в порядке, ожидаемом графическим API.
 using Matrix = std::array<float, 16>;
+
+/// Шейдеры, встроенные в исполняемый файл, по одному варианту на графический API.
+const std::array<bgfx::EmbeddedShader, 3> kEmbeddedShaders = {{
+    BGFX_EMBEDDED_SHADER(vs_mesh),
+    BGFX_EMBEDDED_SHADER(fs_mesh),
+    BGFX_EMBEDDED_SHADER_END(),
+}};
 
 /// Владение библиотекой: инициализация парная выключению.
 ///
@@ -50,15 +88,63 @@ public:
     Library& operator=(Library&&) = delete;
 };
 
+/// Собирает программу из шейдеров, встроенных в исполняемый файл.
+///
+/// Встроенные шейдеры избавляют клиента от зависимости от расположения файлов.
+/// Загрузка с диска появится вместе с конвейером ассетов.
+bgfx::ProgramHandle load_mesh_program() {
+    const bgfx::RendererType::Enum renderer = bgfx::getRendererType();
+
+    const bgfx::ShaderHandle vertex =
+        bgfx::createEmbeddedShader(kEmbeddedShaders.data(), renderer, "vs_mesh");
+    const bgfx::ShaderHandle fragment =
+        bgfx::createEmbeddedShader(kEmbeddedShaders.data(), renderer, "fs_mesh");
+
+    if (!bgfx::isValid(vertex) || !bgfx::isValid(fragment)) {
+        throw std::runtime_error("shader creation failed");
+    }
+
+    // Программа принимает владение шейдерами и уничтожит их вместе с собой.
+    const bgfx::ProgramHandle program = bgfx::createProgram(vertex, fragment, true);
+    if (!bgfx::isValid(program)) {
+        throw std::runtime_error("shader program creation failed");
+    }
+
+    return program;
+}
+
 }  // namespace
 
 struct Renderer::State {
     State(void* native_window_handle, std::uint32_t initial_width, std::uint32_t initial_height)
         : library(native_window_handle, initial_width, initial_height),
+          program(load_mesh_program()),
+          albedo_sampler(bgfx::createUniform("s_albedo", bgfx::UniformType::Sampler)),
           width(initial_width),
-          height(initial_height) {}
+          height(initial_height) {
+        if (!bgfx::isValid(albedo_sampler)) {
+            throw std::runtime_error("sampler uniform creation failed");
+        }
+    }
+
+    ~State() {
+        if (bgfx::isValid(albedo_sampler)) {
+            bgfx::destroy(albedo_sampler);
+        }
+
+        if (bgfx::isValid(program)) {
+            bgfx::destroy(program);
+        }
+    }
+
+    State(const State&) = delete;
+    State& operator=(const State&) = delete;
+    State(State&&) = delete;
+    State& operator=(State&&) = delete;
 
     Library library;
+    bgfx::ProgramHandle program;
+    bgfx::UniformHandle albedo_sampler;
     std::uint32_t width;
     std::uint32_t height;
 };
@@ -75,7 +161,7 @@ void Renderer::resize(std::uint32_t width, std::uint32_t height) {
     bgfx::reset(width, height, BGFX_RESET_VSYNC);
 }
 
-void Renderer::render(const Camera& camera) {
+void Renderer::begin_frame(const Camera& camera) {
     const float aspect_ratio =
         static_cast<float>(state_->width) / static_cast<float>(state_->height);
 
@@ -94,7 +180,26 @@ void Renderer::render(const Camera& camera) {
 
     // Область без вызовов отрисовки обрабатывается только по явному запросу.
     bgfx::touch(kMainView);
+}
 
+void Renderer::draw(const Mesh& mesh, const Texture& texture,
+                    std::span<const float, 16> transform) {
+    bgfx::setTransform(transform.data());
+
+    bgfx::setVertexBuffer(0, mesh.state_->vertex_buffer);
+    bgfx::setIndexBuffer(mesh.state_->index_buffer);
+    bgfx::setTexture(0, state_->albedo_sampler, texture.state_->handle);
+
+    bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z |
+                   BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CW);
+
+    bgfx::submit(kMainView, state_->program);
+}
+
+// Метод не статический намеренно: кадр принадлежит контексту, и вызов вне
+// объекта смысла не имеет.
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+void Renderer::end_frame() {
     bgfx::frame();
 }
 

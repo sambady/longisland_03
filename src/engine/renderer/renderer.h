@@ -2,10 +2,13 @@
 
 #include <cstdint>
 #include <memory>
+#include <span>
 
 namespace engine::renderer {
 
 struct Camera;
+class Mesh;
+class Texture;
 
 /// Графический контекст и отправка кадров на устройство.
 ///
@@ -25,10 +28,19 @@ public:
     /// Вызывается, когда окно сообщило об изменении размера.
     void resize(std::uint32_t width, std::uint32_t height);
 
-    /// Отправляет кадр на устройство.
+    /// Открывает кадр.
     ///
-    /// Камера задаёт матрицы вида и проекции для этого кадра.
-    void render(const Camera& camera);
+    /// Камера задаёт матрицы вида и проекции до конца кадра.
+    void begin_frame(const Camera& camera);
+
+    /// Помещает меш в кадр.
+    ///
+    /// `transform` — матрица модели, шестнадцать чисел по столбцам. Вызывается
+    /// между `begin_frame` и `end_frame`.
+    void draw(const Mesh& mesh, const Texture& texture, std::span<const float, 16> transform);
+
+    /// Завершает кадр и отправляет его на устройство.
+    void end_frame();
 
 private:
     friend std::shared_ptr<Renderer> create_renderer(void* native_window_handle,

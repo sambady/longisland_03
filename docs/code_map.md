@@ -6,7 +6,7 @@
 
 ## Статус
 
-Первый милстоун: клиент открывает окно, инициализирует bgfx и рисует очищенный кадр. ECS, сети, стриминга и ассетов ещё нет.
+Клиент открывает окно и рисует текстурированный меш. ECS, сети, стриминга и конвейера ассетов ещё нет: геометрия и текстура задаются в коде клиента (`src/client/test_content.*`) и уходят вместе с появлением загрузчика.
 
 ## Слои
 
@@ -31,7 +31,7 @@ libraries → bgfx, SDL3, Jolt, glm, ...
 |---|---|---|---|---|---|
 | core | engine | `src/engine/core/` | Версия сборки | — | — |
 | platform | engine | `src/engine/platform/` | Окно, его размер и события | SDL3 | [platform](platform/window.md) |
-| renderer | engine | `src/engine/renderer/` | Графический контекст, кадр, камера | bgfx, bx | [renderer](renderer/renderer.md) |
+| renderer | engine | `src/engine/renderer/` | Графический контекст, кадр, камера, меш, текстура | bgfx, bx | [renderer](renderer/renderer.md) |
 
 ## Точки входа
 

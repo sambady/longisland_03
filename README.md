@@ -634,15 +634,17 @@ The custom runtime should remain small enough that the entire architecture can b
 
 ## Current Status
 
-The first milestone is done: the client creates an SDL3 window, initializes bgfx, renders a cleared frame, handles resize, and shuts down cleanly. Verified on Windows with Direct3D 11.
+The client opens an SDL3 window and renders a textured mesh through bgfx: vertex and index buffers, compiled shaders, a texture, and a camera. Verified on Windows with Direct3D 11.
 
-Two subsystems exist so far — `engine/platform` owns the window, `engine/renderer` owns the graphics context and the camera. Neither leaks its library into its public header.
+Two subsystems exist so far — `engine/platform` owns the window, `engine/renderer` owns the graphics context, the camera, meshes and textures. Neither leaks its library into its public header.
+
+The renderer takes geometry and pixels as data, not as file paths, so an asset pipeline will not change its interface. Until that pipeline exists, the cube and its checker texture are generated in `src/client/test_content.*` — a placeholder that goes away with the loader, not a format decision.
 
 See `docs/code_map.md` for the subsystem map and `docs/build/toolchain.md` for the toolchain.
 
 The next implementation task should be:
 
-> Load and render one static mesh with one texture: a cooked asset format, the shader pipeline, and vertex/index buffer management.
+> Design the asset pipeline: a cooked format for meshes and textures, a compiler from source formats, and a loader that feeds the renderer.
 
 Do not implement ECS, networking, asset streaming, gameplay, or a custom editor yet.
 

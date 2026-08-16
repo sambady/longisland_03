@@ -1,4 +1,7 @@
-add_executable(client main.cpp)
+add_executable(client
+    main.cpp
+    test_content.cpp
+)
 
 target_link_libraries(client
     PRIVATE
