@@ -26,6 +26,9 @@ HeaderFilterRegex: '(engine|runtime|game|client)/.*'
 FormatStyle: file
 
 CheckOptions:
+  # Зонтичные заголовки библиотек: подключается один, а объявления приходят из
+  # внутренних. Требовать включать внутренние — идти против их интерфейса.
+  misc-include-cleaner.IgnoreHeaders: '.*[/\\](SDL3|bgfx|bx|bimg)[/\\].*'
   readability-identifier-naming.NamespaceCase: lower_case
   readability-identifier-naming.ClassCase: CamelCase
   readability-identifier-naming.StructCase: CamelCase
@@ -34,6 +37,11 @@ CheckOptions:
   readability-identifier-naming.VariableCase: lower_case
   readability-identifier-naming.ParameterCase: lower_case
   readability-identifier-naming.PrivateMemberSuffix: _
+  # Константы времени компиляции отличаются от переменных префиксом.
+  readability-identifier-naming.ConstexprVariableCase: CamelCase
+  readability-identifier-naming.ConstexprVariablePrefix: k
+  readability-identifier-naming.GlobalConstantCase: CamelCase
+  readability-identifier-naming.GlobalConstantPrefix: k
   readability-identifier-naming.ConstantCase: lower_case
   # Сокращений избегаем — CLAUDE.md, раздел 9.
   readability-identifier-naming.AggressiveDependentMemberLookup: true

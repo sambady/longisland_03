@@ -634,13 +634,15 @@ The custom runtime should remain small enough that the entire architecture can b
 
 ## Current Status
 
-The build skeleton is in place: toolchain, CMake project, layer boundaries enforced at configure time, and a client executable that builds under both clang-cl and MSVC. No dependencies are wired in yet.
+The first milestone is done: the client creates an SDL3 window, initializes bgfx, renders a cleared frame, handles resize, and shuts down cleanly. Verified on Windows with Direct3D 11.
 
-See `docs/build/toolchain.md` for the toolchain and `docs/code_map.md` for the subsystem map.
+Two subsystems exist so far — `engine/platform` owns the window, `engine/renderer` owns the graphics context and the camera. Neither leaks its library into its public header.
+
+See `docs/code_map.md` for the subsystem map and `docs/build/toolchain.md` for the toolchain.
 
 The next implementation task should be:
 
-> Integrate SDL3 and bgfx, open a window, initialize bgfx, render a clear frame, and shut down cleanly on the target desktop platforms.
+> Load and render one static mesh with one texture: a cooked asset format, the shader pipeline, and vertex/index buffer management.
 
 Do not implement ECS, networking, asset streaming, gameplay, or a custom editor yet.
 

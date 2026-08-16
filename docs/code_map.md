@@ -6,7 +6,7 @@
 
 ## Статус
 
-Собирается скелет: тулчейн, система сборки и первая подсистема `src/engine/core`. Рендеринга, окна и зависимостей пока нет — они появятся с первым милстоуном.
+Первый милстоун: клиент открывает окно, инициализирует bgfx и рисует очищенный кадр. ECS, сети, стриминга и ассетов ещё нет.
 
 ## Слои
 
@@ -30,6 +30,8 @@ libraries → bgfx, SDL3, Jolt, glm, ...
 | Подсистема | Слой | Расположение | Назначение | Зависит от | Документ |
 |---|---|---|---|---|---|
 | core | engine | `src/engine/core/` | Версия сборки | — | — |
+| platform | engine | `src/engine/platform/` | Окно, его размер и события | SDL3 | [platform](platform/window.md) |
+| renderer | engine | `src/engine/renderer/` | Графический контекст, кадр, камера | bgfx, bx | [renderer](renderer/renderer.md) |
 
 ## Точки входа
 
@@ -46,6 +48,7 @@ libraries → bgfx, SDL3, Jolt, glm, ...
 | `cmake/Subsystem.cmake` | `longisland_add_subsystem` — объявление подсистемы и проверка слоёв |
 | `cmake/CompilerWarnings.cmake` | `longisland::warnings` — предупреждения для своего кода |
 | `cmake/Sanitizers.cmake` | `longisland::sanitizers` — ASan и UBSan |
+| `cmake/deps/` | по файлу на внешнюю зависимость: версия и опции сборки |
 
 Тулчейн и пресеты описаны в `docs/build/toolchain.md`.
 
